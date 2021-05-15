@@ -1,11 +1,11 @@
 /*	Author: ejack023
  *	 *	Lab Section: 023
- *	  *	Assignment: Lab #9  Exercise #2
+ *	  *	Assignment: Lab #9  Exercise #3
  *	   *
  *	    *	I acknowledge all content contained herein, excluding template or example
  *	     *	code, is my own original work.
  *	      *
- *	       *	Demo Link: https://www.youtube.com/watch?v=Yrfbmz0LdcM&ab_channel=EthanJackson
+ *	       *	Demo Link: https://www.youtube.com/watch?v=UPu1rmOm6j0&ab_channel=EthanJackson
  *	        */
 
 #include <avr/io.h>
@@ -118,6 +118,50 @@ void Tick_BlinkingLEDSM() {
 	}
 }
 
+enum SM4_STATES {SM4_START, SM4_WAIT, SM4_ON, SM4_OFF} SM4_STATE;
+unsigned char btn;
+unsigned char playSound = 0;
+void Tick_PlaySoundSM() {
+	btn = (~PINA) & 0x04;
+	switch (SM4_STATE) {
+		case SM4_START:
+		if (btn) SM4_STATE = SM4_ON;
+		else SM4_STATE = SM4_WAIT;
+		break;
+		case SM4_WAIT:
+		if (btn) SM4_STATE = SM4_ON;
+		break;
+		case SM4_ON:
+		if (!btn) SM4_STATE = SM4_WAIT;
+		else SM4_STATE = SM4_OFF;
+		break;
+		case SM4_OFF:
+		if (!btn) SM4_STATE = SM4_WAIT;
+		else SM4_STATE = SM4_ON;
+		break;
+		default:
+		SM4_STATE = SM4_WAIT;
+		break;
+	}
+	switch (SM4_STATE) {
+		case SM4_START:
+			playSound = 0x00;
+			break;
+		case SM4_WAIT:
+			playSound = 0x00;
+			break;
+		case SM4_ON:
+			playSound = 0x01;
+			break;
+		case SM4_OFF:
+			playSound = 0x00;
+			break;
+		default:
+			playSound = 0x00;
+			break;
+	}
+};
+
 enum SM3_STATES {SM3_START, SM3_COMBINE} SM3_STATE;
 void Tick_CombineLEDsSM() {
 	switch (SM3_STATE) {
@@ -134,7 +178,7 @@ void Tick_CombineLEDsSM() {
 		case SM3_START:
 			break;
 		case SM3_COMBINE:
-			PORTB = (blinkingLED << 3) | threeLEDs;
+			PORTB = (playSound << 4) | (blinkingLED << 3) | threeLEDs;
 			break;
 		default:
 			break;
@@ -145,13 +189,16 @@ int main(void)
 {
 	unsigned long SM1_elapsedTime = 300;
 	unsigned long SM2_elapsedTime = 1000;
-	const unsigned long timerPeriod = 100;
+	unsigned long SM4_elapsedTime = 2;
+	const unsigned long timerPeriod = 2;
 	DDRB = 0xFF; PORTB = 0x00;
+	DDRA = 0X00; PORTA = 0XFF;
 	TimerSet(timerPeriod);
 	TimerOn();
 	SM1_STATE = SM1_START;
 	SM2_STATE = SM2_START;
 	SM3_STATE = SM3_START;
+	SM4_STATE = SM4_START;
 	while(1) {
 		if (SM1_elapsedTime >= 300) {
 			Tick_ThreeLEDsSM();
@@ -161,11 +208,16 @@ int main(void)
 			Tick_BlinkingLEDSM();
 			SM2_elapsedTime = 0;
 		}
+		if (SM4_elapsedTime >= 2) {
+			Tick_PlaySoundSM();
+			SM4_elapsedTime = 0;
+		}
 		Tick_CombineLEDsSM();
 		while(!TimerFlag);
 		TimerFlag = 0;
 		SM1_elapsedTime += timerPeriod;
 		SM2_elapsedTime += timerPeriod;
+		SM4_elapsedTime += timerPeriod;
 	}
 }
 
