@@ -1,11 +1,11 @@
 /*	Author: ejack023
  *	 *	Lab Section: 023
- *	  *	Assignment: Lab #9  Exercise #2
+ *	  *	Assignment: Lab #9  Exercise #1
  *	   *
  *	    *	I acknowledge all content contained herein, excluding template or example
  *	     *	code, is my own original work.
  *	      *
- *	       *	Demo Link: https://www.youtube.com/watch?v=Yrfbmz0LdcM&ab_channel=EthanJackson
+ *	       *	Demo Link: https://www.youtube.com/watch?v=w9vqF_ChS3U&ab_channel=EthanJackson
  *	        */
 
 #include <avr/io.h>
@@ -143,29 +143,18 @@ void Tick_CombineLEDsSM() {
 
 int main(void)
 {
-	unsigned long SM1_elapsedTime = 300;
-	unsigned long SM2_elapsedTime = 1000;
-	const unsigned long timerPeriod = 100;
 	DDRB = 0xFF; PORTB = 0x00;
-	TimerSet(timerPeriod);
+	TimerSet(1000);
 	TimerOn();
 	SM1_STATE = SM1_START;
 	SM2_STATE = SM2_START;
 	SM3_STATE = SM3_START;
 	while(1) {
-		if (SM1_elapsedTime >= 300) {
-			Tick_ThreeLEDsSM();
-			SM1_elapsedTime = 0;
-		}
-		if (SM2_elapsedTime >= 1000) {
-			Tick_BlinkingLEDSM();
-			SM2_elapsedTime = 0;
-		}
+		Tick_ThreeLEDsSM();
+		Tick_BlinkingLEDSM();
 		Tick_CombineLEDsSM();
 		while(!TimerFlag);
 		TimerFlag = 0;
-		SM1_elapsedTime += timerPeriod;
-		SM2_elapsedTime += timerPeriod;
 	}
 }
 
