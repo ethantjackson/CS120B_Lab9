@@ -56,37 +56,37 @@ enum SM1_STATES {SM1_START, SM1_FIRST, SM1_SECOND, SM1_THIRD} SM1_STATE;
 void Tick_ThreeLEDsSM() {
 	switch(SM1_STATE) {
 		case SM1_START:
-			SM1_STATE = SM1_FIRST;
-			break;
+		SM1_STATE = SM1_FIRST;
+		break;
 		case SM1_FIRST:
-			SM1_STATE = SM1_SECOND;
-			break;
+		SM1_STATE = SM1_SECOND;
+		break;
 		case SM1_SECOND:
-			SM1_STATE = SM1_THIRD;
-			break;
+		SM1_STATE = SM1_THIRD;
+		break;
 		case SM1_THIRD:
-			SM1_STATE= SM1_FIRST;
-			break;
+		SM1_STATE= SM1_FIRST;
+		break;
 		default:
-			SM1_STATE= SM1_FIRST;
-			break;
+		SM1_STATE= SM1_FIRST;
+		break;
 	}
 	switch(SM1_STATE) {
 		case SM1_START:
-		    threeLEDs = 0x00;
-			break;
+		threeLEDs = 0x00;
+		break;
 		case SM1_FIRST:
-			threeLEDs = 0x01;
-			break;
+		threeLEDs = 0x01;
+		break;
 		case SM1_SECOND:
-			threeLEDs = 0x02;
-			break;
+		threeLEDs = 0x02;
+		break;
 		case SM1_THIRD:
-			threeLEDs = 0x04;
-			break;
+		threeLEDs = 0x04;
+		break;
 		default:
-			threeLEDs = 0x00;
-			break;
+		threeLEDs = 0x00;
+		break;
 	}
 }
 
@@ -96,25 +96,25 @@ enum SM2_STATES {SM2_START, SM2_TOGGLE} SM2_STATE;
 void Tick_BlinkingLEDSM() {
 	switch (SM2_STATE) {
 		case SM2_START:
-			SM2_STATE = SM2_TOGGLE;
-			break;
+		SM2_STATE = SM2_TOGGLE;
+		break;
 		case SM2_TOGGLE:
-			break;
+		break;
 		default:
-			SM2_STATE = SM2_TOGGLE;
-			break;
+		SM2_STATE = SM2_TOGGLE;
+		break;
 	}
 	switch (SM2_STATE) {
 		case SM2_START:
-			blinkingLED = 0;
-			break;
+		blinkingLED = 0;
+		break;
 		case SM2_TOGGLE:
-			if (!blinkingLED) blinkingLED = 1;
-			else blinkingLED = 0;
-			break;
+		if (!blinkingLED) blinkingLED = 1;
+		else blinkingLED = 0;
+		break;
 		default:
-			blinkingLED = 0;
-			break;
+		blinkingLED = 0;
+		break;
 	}
 }
 
@@ -122,39 +122,50 @@ enum SM3_STATES {SM3_START, SM3_COMBINE} SM3_STATE;
 void Tick_CombineLEDsSM() {
 	switch (SM3_STATE) {
 		case SM3_START:
-			SM3_STATE = SM3_COMBINE;
-			break;
+		SM3_STATE = SM3_COMBINE;
+		break;
 		case SM3_COMBINE:
-			break;
+		break;
 		default:
-			SM3_STATE = SM3_COMBINE;
-			break;
+		SM3_STATE = SM3_COMBINE;
+		break;
 	}
 	switch (SM3_STATE) {
 		case SM3_START:
-			break;
+		break;
 		case SM3_COMBINE:
-			PORTB = (blinkingLED << 3) | threeLEDs;
-			break;
+		PORTB = (blinkingLED << 3) | threeLEDs;
+		break;
 		default:
-			break;
+		break;
 	}
 }
 
 int main(void)
 {
+	unsigned long SM1_elapsedTime = 1000;
+	unsigned long SM2_elapsedTime = 1000;
+	const unsigned long timerPeriod = 1;
 	DDRB = 0xFF; PORTB = 0x00;
-	TimerSet(1000);
+	TimerSet(timerPeriod);
 	TimerOn();
 	SM1_STATE = SM1_START;
 	SM2_STATE = SM2_START;
 	SM3_STATE = SM3_START;
 	while(1) {
-		Tick_ThreeLEDsSM();
-		Tick_BlinkingLEDSM();
+		if (SM1_elapsedTime >= 1000) {
+			Tick_ThreeLEDsSM();
+			SM1_elapsedTime = 0;
+		}
+		if (SM2_elapsedTime >= 1000) {
+			Tick_BlinkingLEDSM();
+			SM2_elapsedTime = 0;
+		}
 		Tick_CombineLEDsSM();
 		while(!TimerFlag);
 		TimerFlag = 0;
+		SM1_elapsedTime += timerPeriod;
+		SM2_elapsedTime += timerPeriod;
 	}
 }
 

@@ -145,7 +145,7 @@ int main(void)
 {
 	unsigned long SM1_elapsedTime = 300;
 	unsigned long SM2_elapsedTime = 1000;
-	const unsigned long timerPeriod = 100;
+	const unsigned long timerPeriod = 1;
 	DDRB = 0xFF; PORTB = 0x00;
 	TimerSet(timerPeriod);
 	TimerOn();

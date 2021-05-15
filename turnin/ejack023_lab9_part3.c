@@ -190,7 +190,7 @@ int main(void)
 	unsigned long SM1_elapsedTime = 300;
 	unsigned long SM2_elapsedTime = 1000;
 	unsigned long SM4_elapsedTime = 2;
-	const unsigned long timerPeriod = 2;
+	const unsigned long timerPeriod = 1;
 	DDRB = 0xFF; PORTB = 0x00;
 	DDRA = 0X00; PORTA = 0XFF;
 	TimerSet(timerPeriod);
